@@ -1,0 +1,109 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             String @id @default(uuid())
+  username       String @unique
+  password       String
+  name           String
+  email          String
+  phoneNumber    String
+  profilePicture String
+
+  //Relations
+  reviews  Review[]
+  bookings Booking[]
+}
+
+model Host {
+  id             String @id @default(uuid())
+  username       String @unique
+  password       String
+  name           String
+  email          String
+  phoneNumber    String
+  profilePicture String
+  aboutMe        String
+
+  // relations
+  properties Property[]
+}
+
+model Property {
+  id            String  @id @default(uuid())
+  title         String
+  description   String
+  location      String
+  pricePerNight Decimal
+  bedroomCount  Int
+  bathRoomCount Int
+  maxGuestCount Int
+  rating        Int
+
+  // relations can contain many
+  bookings  Booking[]
+  reviews   Review[]
+  amenities AmenitiesOnProperties[]
+
+  // relation has one host
+  host Host @relation(fields: [hostId], references: [id])
+
+  hostId String
+}
+
+model Amenity {
+  id   String @id @default(uuid())
+  name String
+
+  //relations many
+  properties AmenitiesOnProperties[]
+}
+
+model AmenitiesOnProperties {
+  property   Property @relation(fields: [propertyId], references: [id])
+  propertyId String
+  amenity    Amenity  @relation(fields: [amenityId], references: [id])
+  amenityId  String
+
+  @@id([propertyId, amenityId])
+}
+
+model Booking {
+  id             String   @id @default(uuid())
+  checkinDate    DateTime
+  checkoutDate   DateTime
+  numberOfGuests Int
+  totalPrice     Int
+  bookingStatus  String
+
+  // relations
+  user       User?     @relation(fields: [userId], references: [id])
+  property   Property? @relation(fields: [propertyId], references: [id])
+  userId     String
+  propertyId String
+}
+
+model Review {
+  id      String @id @default(uuid())
+  rating  Int
+  comment String
+
+  //relations
+  user     User?     @relation(fields: [userId], references: [id])
+  property Property? @relation(fields: [propertyId], references: [id])
+
+  userId     String
+  propertyId String
+}
