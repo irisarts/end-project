@@ -58,7 +58,16 @@ router.delete(
   (req, res) => {
     const { id } = req.params;
     const deletedAmenityId = deleteAmenity(id);
-    res.status(200).json(deleteAmenity)
+    if (deletedAmenityId) {
+      res.status(200).send({
+      message: `Amenity with id ${id} successfully deleted`,
+      deletedAmenityId,
+      });
+  } else {
+      res.status(404).json({
+      message: `Amenity with id ${deletedAmenityId} not found`,
+      });
+  }
   },
   notFoundErrorHandler
 );

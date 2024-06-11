@@ -13,7 +13,8 @@ const router = express.Router();
 router.get(
   "/",
   (req, res) => {
-      const properties = viewProperties();
+    const { hostId, location, pricePerNight } = req.query;
+      const properties = viewProperties(hostId, location, pricePerNight);
       res.status(200).json(properties);
   },
   notFoundErrorHandler

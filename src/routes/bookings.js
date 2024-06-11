@@ -13,7 +13,8 @@ const router = express.Router();
 router.get(
   "/",
   (req, res) => {
-      const bookings = viewBookings();
+    const { userId, propertyId } = req.query;
+      const bookings = viewBookings(userId, propertyId);
       res.status(200).json(bookings);
   },
   notFoundErrorHandler
@@ -32,7 +33,9 @@ router.get(
 
 router.post(
   "/",
+  authMiddleware,
   (req, res) => {
+    console.log("blajlabfb")
       const {
         userId,
         propertyId,

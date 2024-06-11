@@ -55,7 +55,7 @@ model Property {
   // relations can contain many
   bookings  Booking[]
   reviews   Review[]
-  amenities AmenitiesOnProperties[]
+  amenities Amenity[]
 
   // relation has one host
   host Host @relation(fields: [hostId], references: [id])
@@ -67,18 +67,10 @@ model Amenity {
   id   String @id @default(uuid())
   name String
 
-  //relations many
-  properties AmenitiesOnProperties[]
+  properties Property[]
+
 }
 
-model AmenitiesOnProperties {
-  property   Property @relation(fields: [propertyId], references: [id])
-  propertyId String
-  amenity    Amenity  @relation(fields: [amenityId], references: [id])
-  amenityId  String
-
-  @@id([propertyId, amenityId])
-}
 
 model Booking {
   id             String   @id @default(uuid())
@@ -101,7 +93,7 @@ model Review {
   comment String
 
   //relations
-  user     User?     @relation(fields: [userId], references: [id])
+  user     User? @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   property Property? @relation(fields: [propertyId], references: [id])
 
   userId     String
