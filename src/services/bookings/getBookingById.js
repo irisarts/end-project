@@ -1,13 +1,36 @@
-import bookingData from '../../data/bookings.json' assert { type: 'json' }
+// import prisma from "../../middleware/client.js";
 
-const getBookingById = (id) => {
-    const booking = bookingData.bookings.find(booking => booking.id === id);
+// const getBookingById = async (id) => {
+//   try {
+//     const booking = await prisma.booking.findUnique({
+//       where: { id },
+//     });
+    
+//     if (!booking) {
+//       return null;
+//     }
+//     return booking;
+//   } catch (error) {
+//     throw new Error("Database failed.");
+//   }
+  
+// };
 
-    if (!booking) {
-        throw new Error(`booking was not defined`);
-    }
+// export default getBookingById;
 
-    return booking
-}
+import prisma from "../../middleware/client.js";
+
+const getBookingById = async (id) => {
+  try {
+    const booking = await prisma.booking.findUnique({
+      where: { id },
+    });
+
+    return booking;
+  } catch (error) {
+    throw new Error("Database failed.");
+  }
+  
+};
 
 export default getBookingById;

@@ -1,7 +1,7 @@
-import bookingData from "../../data/bookings.json" assert { type: "json" };
 import { v4 as uuid } from "uuid";
+import { PrismaClient } from "@prisma/client";
 
-const createBooking = (
+const createBooking = async (
   userId,
   propertyId,
   checkinDate,
@@ -10,23 +10,34 @@ const createBooking = (
   totalPrice,
   bookingStatus
 ) => {
-  const newBooking = {
-    id: uuid(),
-    userId,
-    propertyId,
-    checkinDate,
-    checkoutDate,
-    numberOfGuests,
-    totalPrice,
-    bookingStatus,
-  };
+  try {
+    const prisma = new PrismaClient();
+    //   const newBooking = {
+    //     id: uuid(),
+    //     userId,
+    //     propertyId,
+    //     checkinDate,
+    //     checkoutDate,
+    //     numberOfGuests,
+    //     totalPrice,
+    //     bookingStatus,
+    //   };
 
-  if (!userId) {
-    throw new Error(`userId was not defined`);
-}
-
-  bookingData.bookings.push(newBooking);
-  return newBooking;
+    //   bookingData.bookings.push(newBooking);
+    return await prisma.booking.create({
+      data: {
+        id: uuid(),
+        userId,
+        propertyId,
+        checkinDate,
+        checkoutDate,
+        numberOfGuests,
+        totalPrice,
+        bookingStatus,
+      },
+    });
+  } catch (error) {
+    return null;
+  }
 };
-
 export default createBooking;

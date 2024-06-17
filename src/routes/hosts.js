@@ -8,6 +8,7 @@ import notFoundErrorHandler from "../middleware/notFoundErrorHandler.js";
 import authMiddleware from "../middleware/auth.js";
 import errorHandler from "../middleware/errorHandler.js";
 
+
 const router = express.Router();
 
 router.get(
@@ -36,7 +37,7 @@ router.get(
 router.post(
   "/",
   authMiddleware,
-  (req, res) => {
+  async(req, res, next) => {
     const {
       username,
       password,
@@ -46,7 +47,8 @@ router.post(
       profilePicture,
       aboutMe,
     } = req.body;
-    const newHost = createHost(
+    try {
+    const newHost = await createHost(
       username,
       password,
       name,
@@ -55,9 +57,13 @@ router.post(
       profilePicture,
       aboutMe
     );
-    res.status(201).json(newHost);
-  },
-  errorHandler
+    if (!newHost) {
+      res.status(400).json(newHost)
+  } else {
+    res.status(201).json(newHost)
+  }} catch (error) {
+    next(error);
+  }}
 );
 
 router.put(
@@ -102,4 +108,6 @@ router.delete(
   notFoundErrorHandler
 );
 
+
+router.use(errorHandler);
 export default router;

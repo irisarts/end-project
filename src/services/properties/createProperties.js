@@ -1,7 +1,7 @@
-import propertyData from "../../data/properties.json" assert { type: "json" };
 import { v4 as uuid } from "uuid";
+import { PrismaClient } from "@prisma/client";
 
-const createProperty = (
+const createProperty = async (
   title,
   description,
   location,
@@ -12,25 +12,25 @@ const createProperty = (
   hostId,
   rating
 ) => {
-  const newProperty = {
-    id: uuid(),
-    title,
-    description,
-    location,
-    pricePerNight,
-    bedroomCount,
-    bathRoomCount,
-    maxGuestCount,
-    hostId,
-    rating,
-  };
-
-  if (!title) {
-    throw new Error(`title was not defined`);
-}
-
-  propertyData.properties.push(newProperty)
-  return newProperty;
+  try {
+    const prisma = new PrismaClient();
+    return await prisma.property.create({
+      data: {
+        id: uuid(),
+        title,
+        description,
+        location,
+        pricePerNight,
+        bedroomCount,
+        bathRoomCount,
+        maxGuestCount,
+        hostId,
+        rating,
+      },
+    });
+  } catch (error) {
+    return null;
+  }
 };
 
 export default createProperty;

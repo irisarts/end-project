@@ -8,14 +8,15 @@ import notFoundErrorHandler from "../middleware/notFoundErrorHandler.js";
 import authMiddleware from "../middleware/auth.js";
 import errorHandler from "../middleware/errorHandler.js";
 
+
 const router = express.Router();
 
 router.get(
   "/",
   (req, res) => {
     const { hostId, location, pricePerNight } = req.query;
-      const properties = viewProperties(hostId, location, pricePerNight);
-      res.status(200).json(properties);
+    const properties = viewProperties(hostId, location, pricePerNight);
+    res.status(200).json(properties);
   },
   notFoundErrorHandler
 );
@@ -23,30 +24,27 @@ router.get(
 router.get(
   "/:id",
   (req, res) => {
-      const { id } = req.params;
-      const property = getPropertyById(id);
-      res.status(200).json(property);
-
+    const { id } = req.params;
+    const property = getPropertyById(id);
+    res.status(200).json(property);
   },
   notFoundErrorHandler
 );
 
-router.post(
-  "/",
-  authMiddleware,
-  (req, res) => {
-    const {
-      title,
-      description,
-      location,
-      pricePerNight,
-      bedroomCount,
-      bathRoomCount,
-      maxGuestCount,
-      hostId,
-      rating,
-    } = req.body;
-    const newProperty = createProperty(
+router.post("/", authMiddleware, async (req, res, next) => {
+  const {
+    title,
+    description,
+    location,
+    pricePerNight,
+    bedroomCount,
+    bathRoomCount,
+    maxGuestCount,
+    hostId,
+    rating,
+  } = req.body;
+  try {
+    const newProperty = await createProperty(
       title,
       description,
       location,
@@ -57,10 +55,15 @@ router.post(
       hostId,
       rating
     );
-    res.status(201).json(newProperty);
-  },
-  errorHandler
-);
+    if (!newProperty) {
+      res.status(400).json(newProperty);
+    } else {
+      res.status(201).json(newProperty);
+    }
+  } catch (error) {
+    next(error);
+  }
+});
 
 router.put(
   "/:id",
@@ -107,5 +110,7 @@ router.delete(
   },
   notFoundErrorHandler
 );
+
+router.use(errorHandler);
 
 export default router;

@@ -10,6 +10,8 @@ import errorHandler from "../middleware/errorHandler.js";
 
 const router = express.Router();
 
+
+
 router.get(
   "/",
   (req, res) => {
@@ -32,18 +34,26 @@ router.get(
 router.post(
   "/",
   authMiddleware,
-  (req, res) => {
+  async(req, res, next) => {
     const { name } = req.body;
-    const newAmenity = createAmenity(name);
-    res.status(201).json(newAmenity);
-  },
-  errorHandler
+    try {
+      const newAmenity = await createAmenity(name);
+    if (!newAmenity) {
+      res.status(400).json(newAmenity)
+    } else {
+      res.status(201).json(newAmenity)
+    }
+    } catch (error) {
+      next(error);
+    }}
+  
 );
 
 router.put(
   "/:id",
   authMiddleware,
   (req, res) => {
+    console.log("hier in put")
     const { id } = req.params;
     const { name } = req.body;
     const updatedAmenity = updateAmenityById(id, name);
@@ -55,9 +65,9 @@ router.put(
 router.delete(
   "/:id",
   authMiddleware,
-  (req, res) => {
+  async(req, res) => {
     const { id } = req.params;
-    const deletedAmenityId = deleteAmenity(id);
+    const deletedAmenityId = await deleteAmenity(id);
     if (deletedAmenityId) {
       res.status(200).send({
       message: `Amenity with id ${id} successfully deleted`,
@@ -72,4 +82,8 @@ router.delete(
   notFoundErrorHandler
 );
 
+router.use(errorHandler);
+
 export default router;
+
+

@@ -14,50 +14,77 @@ router.get(
   "/",
   (req, res) => {
     const { userId, propertyId } = req.query;
-      const bookings = viewBookings(userId, propertyId);
-      res.status(200).json(bookings);
+    const bookings = viewBookings(userId, propertyId);
+    res.status(200).json(bookings);
   },
   notFoundErrorHandler
 );
 
-router.get(
-  "/:id",
-  (req, res) => {
-      const { id } = req.params;
-      const booking = getBookingById(id);
+// router.get("/:id", async (req, res, next) => {
+//   const { id } = req.params;
+//   try {
+//     const booking = await getBookingById(id);
+//     // console.log(booking);
+//     if (!booking) {
+      
+//       res.status(404).json(booking);
+//     } else {
+//       console.log(booking);
+//       res.status(303).json(booking);
+//     }
+//   } catch (error) {
+//     next(error);
+//   }
+// });
 
-      res.status(200).json(booking);
-  },
-  notFoundErrorHandler
-);
+router.get("/:id", async (req, res, next) => {
+  const { id } = req.params;
+  try {
+    const booking = await getBookingById(id);
 
-router.post(
-  "/",
-  authMiddleware,
-  (req, res) => {
-    console.log("blajlabfb")
-      const {
-        userId,
-        propertyId,
-        checkinDate,
-        checkoutDate,
-        numberOfGuests,
-        totalPrice,
-        bookingStatus,
-      } = req.body;
-      const newBooking = createBooking(
-        userId,
-        propertyId,
-        checkinDate,
-        checkoutDate,
-        numberOfGuests,
-        totalPrice,
-        bookingStatus
-      );
+    console.log("booking:",booking);
+
+    if (!booking) {
+      console.log("booking kan niet gevonden worden")      
+      res.status(404).json(booking);
+    } else {
+      console.log("booking gevonden:",booking);
+      res.status(303).json(booking);
+    }
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.post("/", authMiddleware, async (req, res, next) => {
+  const {
+    userId,
+    propertyId,
+    checkinDate,
+    checkoutDate,
+    numberOfGuests,
+    totalPrice,
+    bookingStatus,
+  } = req.body;
+  try {
+    const newBooking = await createBooking(
+      userId,
+      propertyId,
+      checkinDate,
+      checkoutDate,
+      numberOfGuests,
+      totalPrice,
+      bookingStatus
+    );
+    if (!newBooking) {
+      res.status(400).json(newBooking);
+    } else {
       res.status(201).json(newBooking);
-  },
-  errorHandler
-);
+    }
+  } catch (error) {
+    next(error);
+  }
+});
 
 router.put(
   "/:id",
@@ -83,6 +110,13 @@ router.put(
       totalPrice,
       bookingStatus
     );
+
+    if (!updateBookingById) {
+      return res
+        .status(404)
+        .json({ error: `Booking with ${id} was not found!` });
+    }
+
     res.status(200).json(updatedBooking);
   },
   notFoundErrorHandler
@@ -101,5 +135,8 @@ router.delete(
   },
   notFoundErrorHandler
 );
+
+router.use(notFoundErrorHandler);
+router.use(errorHandler);
 
 export default router;

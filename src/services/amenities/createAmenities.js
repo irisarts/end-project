@@ -1,17 +1,18 @@
-import amenityData from '../../data/amenities.json' assert { type: 'json' }
-import { v4 as uuid } from 'uuid';
+import { v4 as uuid } from "uuid";
+import { PrismaClient } from "@prisma/client/extension";
 
-const createAmenity = (name) => {
-    const newAmenity = {
+const createAmenity = async (name) => {
+  try {
+    const prisma = new PrismaClient();
+    return await prisma.amenity.create({
+      data: {
         id: uuid(),
-        name
-    };
-
-    if (!name) {
-        throw new Error(`name was not defined`);
-    }
-    amenityData.amenities.push(newAmenity)
-    return newAmenity;
-}
+        name,
+      },
+    });
+  } catch (error) {
+    return null;
+  }
+};
 
 export default createAmenity;

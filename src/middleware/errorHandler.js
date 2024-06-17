@@ -1,6 +1,13 @@
-const errorHandler = (err, req, res, next) => {
-    console.error(err)
-    res.status(400).json({ message: 'An error occurred on the server, please double-check your request!' })
-  }
-  
-  export default errorHandler
+// import prisma from "./client.js";
+
+const errorHandler = (err, res) => {
+  console.error(err);
+  res.status(500).json({
+    message:
+      "Er ging iets fout",
+  });
+};
+
+export default errorHandler;
+
+

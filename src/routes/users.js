@@ -26,9 +26,9 @@ router.get(
 router.get(
   "/:id",
   (req, res) => {
-      const { id } = req.params;
-      const user = getUserById(id);
-      res.status(200).json(user);    
+    const { id } = req.params;
+    const user = getUserById(id);
+    res.status(200).json(user);
   },
   notFoundErrorHandler
 );
@@ -36,18 +36,26 @@ router.get(
 router.post(
   "/",
   authMiddleware,
-  (req, res) => {
+  (req, res, next) => {
     const { username, password, name, email, phoneNumber, profilePicture } =
       req.body;
-    const newUser = createUser(
-      username,
-      password,
-      name,
-      email,
-      phoneNumber,
-      profilePicture
-    );
-    res.status(201).json(newUser);
+    try {
+      const newUser = createUser(
+        username,
+        password,
+        name,
+        email,
+        phoneNumber,
+        profilePicture
+      );
+      if (!newUser) {
+        res.status(400).json(newUser);
+      } else {
+        res.status(201).json(newUser);
+      }
+    } catch (error) {
+      next(error);
+    }
   },
   errorHandler
 );

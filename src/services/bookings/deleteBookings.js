@@ -4,7 +4,8 @@ const deleteBooking = (id) => {
     const index = bookingData.bookings.findIndex((booking) => booking.id === id);
 
     if (index === -1) {
-        throw new Error(`index was not defined`);
+        return null;
+        // throw new Error(`index was not defined`);
     }
 
     bookingData.bookings.splice(index, 1);

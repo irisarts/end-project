@@ -1,13 +1,14 @@
-import amenityData from '../../data/amenities.json' assert { type: 'json' }
+import prisma from "../../middleware/client.js";
 
-const getAmenityById = (id) => {
-    const amenity = amenityData.amenities.find(amenity => amenity.id === id);
-
-    if (!amenity) {
-        throw new Error(`amenity was not defined`);
-    }
+const getAmenityById = async (id) => {
+    try {
+    const amenity = await prisma.amenity.findUnique({
+        where: { id },
+    })
 
     return amenity
+} catch (error) {
+    throw new Error("Database failed.");
 }
-
+};
 export default getAmenityById;

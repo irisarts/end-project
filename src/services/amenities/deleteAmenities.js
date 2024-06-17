@@ -1,13 +1,15 @@
-import amenityData from '../../data/amenities.json' assert { type: 'json' }
+import { PrismaClient } from "@prisma/client/extension";
 
-const deleteAmenity = (id) => {
-    
-    const index = amenityData.amenities.findIndex((amenity) => amenity.id === id);
-    if (index >= 0) {
-        amenityData.amenities.splice(index, 1);
-        return id;
-    }
+const deleteAmenity = async (id) => {
+  try {
+    const prisma = new PrismaClient();
+    const deletedAmenity = await prisma.amenity.delete({
+      where: { id },
+    });
+    return deletedAmenity.id;
+  } catch (error) {
     return null;
-    };
+  }
+};
 
 export default deleteAmenity;

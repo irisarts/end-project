@@ -12,7 +12,7 @@ const viewProperties = (hostId, location, pricePerNight) => {
      }
 
      if (pricePerNight) {
-        properties = properties.filter(property => property.pricePerNight === pricePerNight);
+        properties = properties.filter(property => Number(property.pricePerNight) === Number(pricePerNight));
      }
     return properties;
 };

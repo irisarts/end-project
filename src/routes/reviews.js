@@ -13,8 +13,8 @@ const router = express.Router();
 router.get(
   "/",
   (req, res) => {
-      const reviews = viewReviews();
-      res.status(200).json(reviews);
+    const reviews = viewReviews();
+    res.status(200).json(reviews);
   },
   notFoundErrorHandler
 );
@@ -22,23 +22,26 @@ router.get(
 router.get(
   "/:id",
   (req, res, next) => {
-      const { id } = req.params;
-      const review = getReviewById(id);
-      res.status(200).json(review);
+    const { id } = req.params;
+    const review = getReviewById(id);
+    res.status(200).json(review);
   },
   notFoundErrorHandler
 );
 
-router.post(
-  "/",
-  authMiddleware,
-  (req, res) => {
-    const { userId, propertyId, rating, comment } = req.body;
-    const newReview = createReview(userId, propertyId, rating, comment);
-    res.status(201).json(newReview);
-  },
-  errorHandler
-);
+router.post("/", authMiddleware, async (req, res, next) => {
+  const { userId, propertyId, rating, comment } = req.body;
+  try {
+    const newReview = await createReview(userId, propertyId, rating, comment);
+    if (!newReview) {
+      res.status(400).json(newReview);
+    } else {
+      res.status(201).json(newReview);
+    }
+  } catch (error) {
+    next(error);
+  }
+});
 
 router.put(
   "/:id",
@@ -70,5 +73,7 @@ router.delete(
   },
   notFoundErrorHandler
 );
+
+router.use(errorHandler);
 
 export default router;
