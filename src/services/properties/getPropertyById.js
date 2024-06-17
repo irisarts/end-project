@@ -1,13 +1,14 @@
-import propertyData from '../../data/properties.json' assert { type: 'json' }
+import prisma from "../../middleware/client.js";
 
-
-const getPropertyById = (id) => {
-    const property = propertyData.properties.find(property => property.id === id);
-console.log(property)
-    if (!property) {
-        throw new Error(`property was not defined`);
-    }
-    return property
-}
+const getPropertyById = async (id) => {
+  try {
+    const property = await prisma.property.findUnique({
+      where: { id },
+    });
+    return property;
+  } catch (error) {
+    throw new Error("Database failed.");
+  }
+};
 
 export default getPropertyById;

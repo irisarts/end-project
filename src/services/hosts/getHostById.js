@@ -1,13 +1,13 @@
-import hostData from '../../data/hosts.json' assert { type: 'json' }
+import prisma from "../../middleware/client.js";
 
-const getHostById = (id) => {
-    const host = hostData.hosts.find(host => host.id === id);
-
-
-    if (!host) {
-        throw new Error(`Host was not found`);
-    }
+const getHostById = async (id) => {
+    try {
+    const host = await prisma.host.findUnique({
+        where: { id },
+    })
     return host
-}
+} catch (error) {
+    throw new Error("Database failed.");
+}};
 
 export default getHostById;

@@ -8,7 +8,6 @@ import notFoundErrorHandler from "../middleware/notFoundErrorHandler.js";
 import authMiddleware from "../middleware/auth.js";
 import errorHandler from "../middleware/errorHandler.js";
 
-
 const router = express.Router();
 
 router.get(
@@ -21,15 +20,20 @@ router.get(
   notFoundErrorHandler
 );
 
-router.get(
-  "/:id",
-  (req, res) => {
-    const { id } = req.params;
-    const property = getPropertyById(id);
-    res.status(200).json(property);
-  },
-  notFoundErrorHandler
-);
+router.get("/:id", async (req, res, next) => {
+  const { id } = req.params;
+  try {
+    const property = await getPropertyById(id);
+
+    if (!property) {
+      res.status(404).json(property);
+    } else {
+      res.status(200).json(property);
+    }
+  } catch (error) {
+    next(error);
+  }
+});
 
 router.post("/", authMiddleware, async (req, res, next) => {
   const {

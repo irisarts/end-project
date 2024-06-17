@@ -10,50 +10,49 @@ import errorHandler from "../middleware/errorHandler.js";
 
 const router = express.Router();
 
-
-
 router.get(
   "/",
   (req, res) => {
-      const amenities = viewAmenities();
-      res.status(200).json(amenities);
+    const amenities = viewAmenities();
+    res.status(200).json(amenities);
   },
   notFoundErrorHandler
 );
 
-router.get(
-  "/:id",
-  (req, res) => {
-      const { id } = req.params;
-      const amenity = getAmenityById(id);
-      res.status(200).json(amenity);
-  },
-  notFoundErrorHandler
-);
+router.get("/:id", async (req, res, next) => {
+  const { id } = req.params;
+  try {
+    const amenity = await getAmenityById(id);
 
-router.post(
-  "/",
-  authMiddleware,
-  async(req, res, next) => {
-    const { name } = req.body;
-    try {
-      const newAmenity = await createAmenity(name);
-    if (!newAmenity) {
-      res.status(400).json(newAmenity)
+    if (!amenity) {
+      res.status(404).json(amenity);
     } else {
-      res.status(201).json(newAmenity)
+      res.status(200).json(amenity);
     }
-    } catch (error) {
-      next(error);
-    }}
-  
-);
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.post("/", authMiddleware, async (req, res, next) => {
+  const { name } = req.body;
+  try {
+    const newAmenity = await createAmenity(name);
+    if (!newAmenity) {
+      res.status(400).json(newAmenity);
+    } else {
+      res.status(201).json(newAmenity);
+    }
+  } catch (error) {
+    next(error);
+  }
+});
 
 router.put(
   "/:id",
   authMiddleware,
   (req, res) => {
-    console.log("hier in put")
+    console.log("hier in put");
     const { id } = req.params;
     const { name } = req.body;
     const updatedAmenity = updateAmenityById(id, name);
@@ -65,19 +64,19 @@ router.put(
 router.delete(
   "/:id",
   authMiddleware,
-  async(req, res) => {
+  async (req, res) => {
     const { id } = req.params;
     const deletedAmenityId = await deleteAmenity(id);
     if (deletedAmenityId) {
       res.status(200).send({
-      message: `Amenity with id ${id} successfully deleted`,
-      deletedAmenityId,
+        message: `Amenity with id ${id} successfully deleted`,
+        deletedAmenityId,
       });
-  } else {
+    } else {
       res.status(404).json({
-      message: `Amenity with id ${deletedAmenityId} not found`,
+        message: `Amenity with id ${deletedAmenityId} not found`,
       });
-  }
+    }
   },
   notFoundErrorHandler
 );
@@ -85,5 +84,3 @@ router.delete(
 router.use(errorHandler);
 
 export default router;
-
-
