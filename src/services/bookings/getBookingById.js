@@ -17,11 +17,11 @@
 // };
 
 // export default getBookingById;
-
-import prisma from "../../middleware/client.js";
+import { PrismaClient } from "@prisma/client";
 
 const getBookingById = async (id) => {
   try {
+    const prisma = new PrismaClient();
     const booking = await prisma.booking.findUnique({
       where: { id },
     });

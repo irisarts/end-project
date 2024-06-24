@@ -58,7 +58,7 @@ model Property {
   amenities Amenity[]
 
   // relation has one host
-  host Host @relation(fields: [hostId], references: [id])
+  host Host @relation(fields: [hostId], references: [id], onDelete: Cascade)
 
   hostId String
 }
@@ -81,8 +81,8 @@ model Booking {
   bookingStatus  String
 
   // relations
-  user       User?     @relation(fields: [userId], references: [id])
-  property   Property? @relation(fields: [propertyId], references: [id])
+  user       User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  property   Property? @relation(fields: [propertyId], references: [id], onDelete: Cascade)
   userId     String
   propertyId String
 }
@@ -94,7 +94,7 @@ model Review {
 
   //relations
   user     User? @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  property Property? @relation(fields: [propertyId], references: [id])
+  property Property? @relation(fields: [propertyId], references: [id], onDelete: Cascade)
 
   userId     String
   propertyId String

@@ -69,23 +69,21 @@ router.post("/", authMiddleware, async (req, res, next) => {
   }
 });
 
-router.put(
-  "/:id",
-  authMiddleware,
-  (req, res) => {
-    const { id } = req.params;
-    const {
-      title,
-      description,
-      location,
-      pricePerNight,
-      bedroomCount,
-      bathRoomCount,
-      maxGuestCount,
-      hostId,
-      rating,
-    } = req.body;
-    const updatedProperty = updatePropertyById(
+router.put("/:id", authMiddleware, async (req, res, next) => {
+  const { id } = req.params;
+  const {
+    title,
+    description,
+    location,
+    pricePerNight,
+    bedroomCount,
+    bathRoomCount,
+    maxGuestCount,
+    hostId,
+    rating,
+  } = req.body;
+  try {
+    const updatedProperty = await updatePropertyById(
       id,
       title,
       description,
@@ -97,24 +95,39 @@ router.put(
       hostId,
       rating
     );
-    res.status(200).json(updatedProperty);
-  },
-  notFoundErrorHandler
-);
+    if (!updatedProperty) {
+      res.status(404).json(updatedProperty);
+    } else {
+      res.status(200).json(updatedProperty);
+    }
+  } catch (error) {
+    next(error);
+  }
+});
 
-router.delete(
-  "/:id",
-  authMiddleware,
-  (req, res) => {
-    const { id } = req.params;
-    const deletedPropertyId = deleteProperties(id);
-    res.status(200).json({
-      message: `Property with id ${deletedPropertyId} was deleted`,
-    });
-  },
-  notFoundErrorHandler
-);
+router.delete("/:id", authMiddleware, async (req, res, next) => {
+  const { id } = req.params;
+  try {
+    const deletedPropertyId = await deleteProperties(id);
+    if (deletedPropertyId) {
+      res.status(200).send({
+        message: `Property with id ${id} was deleted`,
+      });
+    } else {
+      res.status(404).json({
+        message: `Property with id ${id} was not found`,
+      });
+    }
+  } catch (error) {
+    if (error.message.includes("not found")) {
+      res.status(404).json({ message: error.message });
+    } else {
+      next(error);
+    }
+  }
+});
 
+router.use(notFoundErrorHandler);
 router.use(errorHandler);
 
 export default router;

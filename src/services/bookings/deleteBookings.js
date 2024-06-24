@@ -1,15 +1,15 @@
-import bookingData from '../../data/bookings.json' assert { type: 'json' }
+import { PrismaClient } from "@prisma/client";
 
-const deleteBooking = (id) => {
-    const index = bookingData.bookings.findIndex((booking) => booking.id === id);
-
-    if (index === -1) {
-        return null;
-        // throw new Error(`index was not defined`);
-    }
-
-    bookingData.bookings.splice(index, 1);
-    return id;
+const deleteBooking = async (id) => {
+    try {
+    const prisma = new PrismaClient;
+    const booking = await prisma.booking.deleteMany({
+        where: { id },   
+    })
+return booking.count > 0 ? id : null;
+} catch (error) {
+    return null;
+  }
 };
 
 export default deleteBooking;

@@ -42,14 +42,10 @@ router.get("/:id", async (req, res, next) => {
   try {
     const booking = await getBookingById(id);
 
-    console.log("booking:",booking);
-
-    if (!booking) {
-      console.log("booking kan niet gevonden worden")      
-      res.status(404).json(booking);
+    if (!booking) {    
+      res.status(404).json({error: "booking kan niet gevonden worden"});
     } else {
-      console.log("booking gevonden:",booking);
-      res.status(303).json(booking);
+      res.status(200).json(booking);
     }
   } catch (error) {
     next(error);
@@ -89,7 +85,7 @@ router.post("/", authMiddleware, async (req, res, next) => {
 router.put(
   "/:id",
   authMiddleware,
-  (req, res) => {
+  async (req, res,next) => {
     const { id } = req.params;
     const {
       userId,
@@ -100,7 +96,8 @@ router.put(
       totalPrice,
       bookingStatus,
     } = req.body;
-    const updatedBooking = updateBookingById(
+    try {
+    const updatedBooking = await updateBookingById(
       id,
       userId,
       propertyId,
@@ -110,31 +107,30 @@ router.put(
       totalPrice,
       bookingStatus
     );
-
-    if (!updateBookingById) {
-      return res
-        .status(404)
-        .json({ error: `Booking with ${id} was not found!` });
+    if (!updatedBooking) {
+      res.status(404).json(updatedBooking);
+    } else {
+      res.status(200).json(updatedBooking);
     }
+  } catch (error) {
+    next(error);
+  }
+});
 
-    res.status(200).json(updatedBooking);
-  },
-  notFoundErrorHandler
-);
+router.delete("/:id", async (req, res, next) => {
+  const { id } = req.params;
+  try {
+    const deletedBookingId = await deleteBooking(id);
 
-router.delete(
-  "/:id",
-  authMiddleware,
-  (req, res) => {
-    const { id } = req.params;
-    const deletedBookingId = deleteBooking(id);
-
-    res.status(200).json({
-      message: `Booking with id ${deletedBookingId} was deleted`,
-    });
-  },
-  notFoundErrorHandler
-);
+    if (!deletedBookingId) {
+      res.status(404).json({ error: `Booking with id ${id} was not found` });
+    } else {
+      res.status(200).json({ message: `Booking with id ${deletedBookingId} was deleted` });
+    }
+  } catch (error) {
+    next(error);
+  }
+});
 
 router.use(notFoundErrorHandler);
 router.use(errorHandler);

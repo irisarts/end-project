@@ -48,24 +48,24 @@ router.post("/", authMiddleware, async (req, res, next) => {
   }
 });
 
-router.put(
-  "/:id",
-  authMiddleware,
-  (req, res) => {
-    console.log("hier in put");
-    const { id } = req.params;
-    const { name } = req.body;
-    const updatedAmenity = updateAmenityById(id, name);
-    res.status(200).json(updatedAmenity);
-  },
-  notFoundErrorHandler
-);
+router.put("/:id", authMiddleware, async (req, res, next) => {
+  const { id } = req.params;
+  const { name } = req.body;
+  try {
+    const updatedAmenity = await updateAmenityById(id, name);
+    if (!updatedAmenity) {
+      res.status(404).json(updatedAmenity);
+    } else {
+      res.status(200).json(updatedAmenity);
+    }
+  } catch (error) {
+    next(error);
+  }
+});
 
-router.delete(
-  "/:id",
-  authMiddleware,
-  async (req, res) => {
-    const { id } = req.params;
+router.delete("/:id", authMiddleware, async (req, res, next) => {
+  const { id } = req.params;
+  try {
     const deletedAmenityId = await deleteAmenity(id);
     if (deletedAmenityId) {
       res.status(200).send({
@@ -74,12 +74,13 @@ router.delete(
       });
     } else {
       res.status(404).json({
-        message: `Amenity with id ${deletedAmenityId} not found`,
+        message: `Amenity with id ${id} not found`,
       });
     }
-  },
-  notFoundErrorHandler
-);
+  } catch (error) {
+    next(error);
+  }
+});
 
 router.use(errorHandler);
 

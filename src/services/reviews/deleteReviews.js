@@ -1,14 +1,15 @@
-import reviewData from "../../data/reviews.json" assert { type: "json" };
+import { PrismaClient } from "@prisma/client";
 
-const deleteReview = (id) => {
-    const index = reviewData.reviews.findIndex((review) => review.id === id);
-
-    if (index === -1)  {
-        throw new Error(`index was not defined`);
-    }
-
-    reviewData.reviews.splice(index, 1);
-    return id;
-}
+const deleteReview = async (id) => {
+  try {
+    const prisma = new PrismaClient();
+    const review = await prisma.review.deleteMany({
+      where: { id },
+    });
+    return review.count ? id : null;
+  } catch (error) {
+    return null;
+  }
+};
 
 export default deleteReview;

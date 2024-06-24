@@ -1,14 +1,16 @@
-import propertyData from '../../data/properties.json' assert { type: 'json' }
+import { PrismaClient } from "@prisma/client";
 
-const deleteProperties = (id) => {
-    const index = propertyData.properties.findIndex((property) => property.id === id);
-
-    if (index === -1) {
-        throw new Error(`index was not defined`);
-    }
-
-    propertyData.properties.splice(index, 1);
-    return id;
+const deleteProperties = async (id) => {
+  try {
+    const prisma = new PrismaClient();
+    const property = await prisma.property.delete({
+      where: { id },
+    });
+    return property ? id : null;
+  } catch (error) {
+    console.error(`Error deleting property:`, error);
+    return null;
+  }
 };
 
 export default deleteProperties;

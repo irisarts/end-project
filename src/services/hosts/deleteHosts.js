@@ -1,14 +1,44 @@
-import hostData from "../../data/hosts.json" assert { type: "json" };
+// import { PrismaClient } from "@prisma/client";
 
-const deleteHost = (id) => {
-    const index = hostData.hosts.findIndex((host) => host.id === id);
+// const deleteHost = async (id) => {
+//   console.log("deleteHost: Function called with id:", id);
+//   try {
+//     const prisma = new PrismaClient();
+//     console.log("Attempting to delete host with id:", id);
+//     const host = await prisma.host.deleteMany({
+//       where: { id },
+//     });
+//     if (!host) {
+//       console.log("Host not found:", id);
+//       return null;
+//     }
+//     return host.count ? id : null;
+//   } catch (error) {
+//     console.error("Error during host deletion:", error);
+//     return null;
+//   }
+// };
 
-    if (index === -1) {
-        throw new Error(`Host was not found`);
-    }
+// export default deleteHost;
 
-    hostData.hosts.splice(index, 1);
-    return id;
+
+import { PrismaClient } from "@prisma/client";
+
+const deleteHost = async (id) => {
+  const prisma = new PrismaClient();
+  try {
+    console.log("Attempting to delete host with id:", id);
+    const host = await prisma.host.delete({
+      where: { id },
+    });
+    return host ? id : null;
+  } catch (error) {
+    console.error("Error during host deletion:", error);
+    return null;
+  } finally {
+    await prisma.$disconnect();
+  }
 };
 
 export default deleteHost;
+

@@ -1,13 +1,15 @@
-import reviewData from '../../data/reviews.json' assert { type: 'json' }
+import { PrismaClient } from "@prisma/client";
 
-const getReviewById = (id) => {
-    const review = reviewData.reviews.find(review => review.id === id);
-
-    if (!review) {
-        throw new Error(`review was not defined`);
-    }
-
-    return review
-}
+const getReviewById = async (id) => {
+  try {
+    const prisma = new PrismaClient();
+    const review = await prisma.review.findUnique({
+      where: { id },
+    });
+    return review;
+  } catch (error) {
+    throw new Error("Database failed.");
+  }
+};
 
 export default getReviewById;

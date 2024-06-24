@@ -1,6 +1,6 @@
-import bookingData from "../../data/bookings.json" assert { type: "json" };
+import { PrismaClient } from "@prisma/client";
 
-const updateBookingById = (
+const updateBookingById = async (
   id,
   userId,
   propertyId,
@@ -10,7 +10,20 @@ const updateBookingById = (
   totalPrice,
   bookingStatus
 ) => {
-  const booking = bookingData.bookings.find((booking) => booking.id === id);
+  const prisma = new PrismaClient();
+  try {
+  const booking = await prisma.booking.update({
+    where: { id },
+    data: {
+    userId,
+  propertyId,
+  checkinDate,
+  checkoutDate,
+  numberOfGuests,
+  totalPrice,
+  bookingStatus
+    }
+  })
 
   if (!booking) {
     return null;
@@ -25,6 +38,11 @@ const updateBookingById = (
   booking.bookingStatus = bookingStatus ?? booking.bookingStatus;
 
   return booking;
+} catch (error) {
+  return null;
+} finally {
+  await prisma.$disconnect();
+}
 };
 
 export default updateBookingById;

@@ -1,13 +1,14 @@
-import userData from '../../data/users.json' assert { type: 'json' }
+import prisma from "../../middleware/client.js";
 
-const getUserById = (id) => {
-    const user = userData.users.find(user => user.id === id);
-
-    if (!user) {
-        throw new Error(`User with ${id} was not found`);
-    }
-
+const getUserById = async (id) => {
+    try{
+    const user = await prisma.user.findUnique({
+        where: { id },
+    })
     return user
+} catch (error) {
+    throw new Error("Database failed.");
 }
+};
 
 export default getUserById;

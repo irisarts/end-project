@@ -1,11 +1,18 @@
-import reviewData from "../../data/reviews.json" assert { type: "json" };
+import { PrismaClient } from "@prisma/client";
 
-const updateReviewById = (id, userId, propertyId, rating, comment) => {
-    const review = reviewData.reviews.find(review => review.id === id);
-
-    if (!review) {
-        throw new Error(`Review with ${id} was not found!`);
-    }
+const updateReviewById = async (id, userId, propertyId, rating, comment) => {
+    const prisma = new PrismaClient();
+    try {
+    const review = await prisma.review.update({
+        where: { id },
+        data: {
+            userId, propertyId, rating, comment
+        }
+      })
+    
+      if (!review) {
+        return null;
+      }
 
     review.userId = userId ?? review.userId;
     review.propertyId = propertyId ?? review.propertyId;
@@ -13,6 +20,10 @@ const updateReviewById = (id, userId, propertyId, rating, comment) => {
     review.comment = comment ?? review.comment;
 
     return review;
-}
-
+} catch (error) {
+    return null;
+  } finally {
+    await prisma.$disconnect();
+  }
+};
 export default updateReviewById;

@@ -39,6 +39,7 @@ router.get("/:id", async (req, res, next) => {
 });
 
 router.post("/", authMiddleware, async (req, res, next) => {
+  console.log("we komen in de router post!!");
   const {
     username,
     password,
@@ -58,6 +59,7 @@ router.post("/", authMiddleware, async (req, res, next) => {
       profilePicture,
       aboutMe
     );
+    console.log("newHost in hosts.js:", newHost);
     if (!newHost) {
       res.status(400).json(newHost);
     } else {
@@ -71,7 +73,7 @@ router.post("/", authMiddleware, async (req, res, next) => {
 router.put(
   "/:id",
   authMiddleware,
-  (req, res) => {
+  async (req, res, next) => {
     const { id } = req.params;
     const {
       username,
@@ -82,7 +84,8 @@ router.put(
       profilePicture,
       aboutMe,
     } = req.body;
-    const updatedHost = updateHostById(
+    try {
+    const updatedHost = await updateHostById(
       id,
       username,
       password,
@@ -92,23 +95,40 @@ router.put(
       profilePicture,
       aboutMe
     );
-    res.status(200).json(updatedHost);
-  },
-  notFoundErrorHandler
-);
+    if (!updatedHost) {
+      res.status(404).json(updatedHost);
+    } else {
+      res.status(200).json(updatedHost);
+    }
+  } catch (error) {
+    next(error);
+  }
+});
 
-router.delete(
-  "/:id",
-  authMiddleware,
-  (req, res) => {
-    const { id } = req.params;
-    const deletedHostId = deleteHost(id);
-    res.status(200).json({
-      message: `Host with id ${deletedHostId} was deleted`,
-    });
-  },
-  notFoundErrorHandler
-);
+router.delete("/:id", authMiddleware, async (req, res, next) => {
+  const { id } = req.params;
+  console.log("Route handler: Received request to delete host with ID:", id);
+  try {
+    console.log("try statement router delete HOST", id)
+    const deletedHostId = await deleteHost(id);
 
+    if (deletedHostId) {
+      console.log("200 statement router delete HOST", deletedHostId)
+      res.status(200).send({
+        message: `Host with id ${deletedHostId} was deleted`,
+      });
+    } else {
+      console.log("404 statement router delete HOST", deletedHostId)
+      res.status(404).json({
+        message: `Host with id ${id} was not found`,
+      });
+    }
+  } catch (error) {
+    console.log("catch statement router delete HOST", error)
+    next(error);
+  }
+});
+
+router.use(notFoundErrorHandler);
 router.use(errorHandler);
 export default router;

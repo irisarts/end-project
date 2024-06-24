@@ -1,5 +1,4 @@
-import { v4 as uuid } from "uuid";
-import { PrismaClient } from "@prisma/client/extension";
+import { PrismaClient } from "@prisma/client";
 
 const createHost = async (
   username,
@@ -11,10 +10,10 @@ const createHost = async (
   aboutMe
 ) => {
   try {
+  
     const prisma = new PrismaClient();
-    return await prisma.host.create({
+    const aangemaakteHost = await prisma.host.create({
       data: {
-        id: uuid(),
         username,
         password,
         name,
@@ -24,6 +23,7 @@ const createHost = async (
         aboutMe,
       },
     });
+    return aangemaakteHost;
   } catch (error) {
     return null;
   }

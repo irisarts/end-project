@@ -19,15 +19,19 @@ router.get(
   notFoundErrorHandler
 );
 
-router.get(
-  "/:id",
-  (req, res, next) => {
-    const { id } = req.params;
-    const review = getReviewById(id);
-    res.status(200).json(review);
-  },
-  notFoundErrorHandler
-);
+router.get("/:id", async (req, res, next) => {
+  const { id } = req.params;
+  try {
+    const review = await getReviewById(id);
+    if (!review) {
+      res.status(404).json(review);
+    } else {
+      res.status(200).json(review);
+    }
+  } catch (error) {
+    next(error);
+  }
+});
 
 router.post("/", authMiddleware, async (req, res, next) => {
   const { userId, propertyId, rating, comment } = req.body;
@@ -43,36 +47,48 @@ router.post("/", authMiddleware, async (req, res, next) => {
   }
 });
 
-router.put(
-  "/:id",
-  authMiddleware,
-  (req, res) => {
-    const { id } = req.params;
-    const { userId, propertyId, rating, comment } = req.body;
-    const updatedReview = updateReviewById(
+router.put("/:id", authMiddleware, async (req, res, next) => {
+  const { id } = req.params;
+  const { userId, propertyId, rating, comment } = req.body;
+  try {
+    const updatedReview = await updateReviewById(
       id,
       userId,
       propertyId,
       rating,
       comment
     );
-    res.status(200).json(updatedReview);
-  },
-  notFoundErrorHandler
-);
+    if (!updatedReview) {
+      res.status(404).json(updatedReview);
+    } else {
+      res.status(200).json(updatedReview);
+    }
+  } catch (error) {
+    next(error);
+  }
+});
 
-router.delete(
-  "/:id",
-  authMiddleware,
-  (req, res) => {
-    const { id } = req.params;
-    const deletedReviewId = deleteReview(id);
-    res.status(200).json({
-      message: `Review with id ${deletedReviewId} was deleted`,
-    });
-  },
-  notFoundErrorHandler
-);
+router.delete("/:id", authMiddleware, async (req, res, next) => {
+  const { id } = req.params;
+  try {
+    const deletedReviewId = await deleteReview(id);
+    if (deletedReviewId) {
+      res
+        .status(200)
+        .send({ message: `Review with id ${id} was successfully deleted` });
+    } else {
+      res.status(404).json({
+        message: `Review with id ${id} not found`,
+      });
+    }
+  } catch (error) {
+    if (error.message.includes("not found")) {
+      res.status(404).json({ message: error.message });
+    } else {
+      next(error);
+    }
+  }
+});
 
 router.use(errorHandler);
 

@@ -23,15 +23,20 @@ router.get(
   notFoundErrorHandler
 );
 
-router.get(
-  "/:id",
-  (req, res) => {
-    const { id } = req.params;
-    const user = getUserById(id);
-    res.status(200).json(user);
-  },
-  notFoundErrorHandler
-);
+router.get("/:id", async (req, res, next) => {
+  const { id } = req.params;
+  try {
+    const user = await getUserById(id);
+
+    if (!user) {
+      res.status(404).json(user);
+    } else {
+      res.status(200).json(user);
+    }
+  } catch (error) {
+    next(error);
+  }
+});
 
 router.post(
   "/",
@@ -60,14 +65,12 @@ router.post(
   errorHandler
 );
 
-router.put(
-  "/:id",
-  authMiddleware,
-  (req, res) => {
-    const { id } = req.params;
-    const { username, password, name, email, phoneNumber, profilePicture } =
-      req.body;
-    const updatedUser = updateUserById(
+router.put("/:id", authMiddleware, async (req, res, next) => {
+  const { id } = req.params;
+  const { username, password, name, email, phoneNumber, profilePicture } =
+    req.body;
+  try {
+    const updatedUser = await updateUserById(
       id,
       username,
       password,
@@ -76,23 +79,44 @@ router.put(
       phoneNumber,
       profilePicture
     );
-    res.status(200).json(updatedUser);
-  },
-  notFoundErrorHandler
-);
+    if (!updatedUser) {
+      res.status(404).json(updatedUser);
+    } else {
+      res.status(200).json(updatedUser);
+    }
+  } catch (error) {
+    next(error);
+  }
+});
 
-router.delete(
-  "/:id",
-  authMiddleware,
-  (req, res) => {
-    const { id } = req.params;
-    const deletedUserId = deleteUser(id);
+router.delete("/:id", authMiddleware, async (req, res, next) => {
+  const { id } = req.params;
+  console.log("Received request to delete user with ID:", id);
+  try {
+    const deletedUserId = await deleteUser(id);
+    console.log("deleteUser result:", deletedUserId);
+    if (deletedUserId) {
+      console.log(`User with id ${id} successfully deleted`);
+      res.status(200).send({
+        message: `User with id ${id} successfully deleted`,
+      });
+    } else {
+      console.log(`User with id ${id} not found`);
+      res.status(404).json({
+        message: `User with id ${id} not found`,
+      });
+    }
+  } catch (error) {
+    console.error("Error during deletion:", error);
+    if (error.message.includes("not found")) {
+      res.status(404).json({ message: error.message });
+    } else {
+      next(error);
+    }
+  }
+});
 
-    res.status(200).json({
-      message: `User with id ${deletedUserId} was deleted`,
-    });
-  },
-  notFoundErrorHandler
-);
+router.use(notFoundErrorHandler);
+router.use(errorHandler);
 
 export default router;
