@@ -1,4 +1,3 @@
-import { v4 as uuid } from "uuid";
 import { PrismaClient } from "@prisma/client";
 
 const createProperty = async (
@@ -16,7 +15,6 @@ const createProperty = async (
     const prisma = new PrismaClient();
     return await prisma.property.create({
       data: {
-        id: uuid(),
         title,
         description,
         location,

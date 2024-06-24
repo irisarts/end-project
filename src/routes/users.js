@@ -34,32 +34,27 @@ router.get("/:id", async (req, res, next) => {
   }
 });
 
-router.post(
-  "/",
-  authMiddleware,
-  (req, res, next) => {
-    const { username, password, name, email, phoneNumber, profilePicture } =
-      req.body;
-    try {
-      const newUser = createUser(
-        username,
-        password,
-        name,
-        email,
-        phoneNumber,
-        profilePicture
-      );
-      if (!newUser) {
-        res.status(400).json(newUser);
-      } else {
-        res.status(201).json(newUser);
-      }
-    } catch (error) {
-      next(error);
+router.post("/", authMiddleware, async (req, res, next) => {
+  const { username, password, name, email, phoneNumber, profilePicture } =
+    req.body;
+  try {
+    const newUser = await createUser(
+      username,
+      password,
+      name,
+      email,
+      phoneNumber,
+      profilePicture
+    );
+    if (!newUser) {
+      res.status(400).json(newUser);
+    } else {
+      res.status(201).json(newUser);
     }
-  },
-  errorHandler
-);
+  } catch (error) {
+    next(error);
+  }
+});
 
 router.put("/:id", authMiddleware, async (req, res, next) => {
   const { id } = req.params;

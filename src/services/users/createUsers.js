@@ -1,8 +1,6 @@
-import userData from "../../data/users.json" assert { type: "json" };
-import { v4 as uuid } from "uuid";
-// import prisma from "../../middleware/client.js";
+import { PrismaClient } from "@prisma/client";
 
-const createUser = (
+const createUser = async (
   username,
   password,
   name,
@@ -11,20 +9,17 @@ const createUser = (
   profilePicture
 ) => {
   try {
-    const newUser = {
-      id: uuid(),
-      username,
-      password,
-      name,
-      email,
-      phoneNumber,
-      profilePicture,
-    };
-
-      if (!username) {
-        throw new Error(`Username was not defined`);
-    }
-    userData.users.push(newUser);
+    const prisma = new PrismaClient();
+    const newUser = await prisma.user.create({
+      data: {
+        username,
+        password,
+        name,
+        email,
+        phoneNumber,
+        profilePicture,
+      },
+    });
     return newUser;
   } catch (error) {
     return null;

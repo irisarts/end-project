@@ -1,7 +1,8 @@
-import prisma from "../../middleware/client.js";
+import { PrismaClient } from "@prisma/client";
 
 const getPropertyById = async (id) => {
   try {
+    const prisma = new PrismaClient();
     const property = await prisma.property.findUnique({
       where: { id },
     });
