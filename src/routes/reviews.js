@@ -10,14 +10,14 @@ import errorHandler from "../middleware/errorHandler.js";
 
 const router = express.Router();
 
-router.get(
-  "/",
-  (req, res) => {
-    const reviews = viewReviews();
+router.get("/", async (req, res, next) => {
+  try {
+    const reviews = await viewReviews();
     res.status(200).json(reviews);
-  },
-  notFoundErrorHandler
-);
+  } catch (error) {
+    next(error);
+  }
+});
 
 router.get("/:id", async (req, res, next) => {
   const { id } = req.params;
@@ -90,6 +90,7 @@ router.delete("/:id", authMiddleware, async (req, res, next) => {
   }
 });
 
+router.use(notFoundErrorHandler);
 router.use(errorHandler);
 
 export default router;

@@ -1,9 +1,13 @@
-import amenityData from '../../data/amenities.json' assert { type: 'json' }
+import { PrismaClient } from "@prisma/client";
 
-const viewAmenities = () => {
-    return amenityData["amenities"];
-
+const viewAmenities = async () => {
+  try {
+    const prisma = new PrismaClient();
+    const amenities = await prisma.amenity.findMany();
+    return amenities;
+  } catch (error) {
+    return null;
+  }
 };
 
 export default viewAmenities;
-

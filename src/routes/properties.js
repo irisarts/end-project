@@ -10,15 +10,15 @@ import errorHandler from "../middleware/errorHandler.js";
 
 const router = express.Router();
 
-router.get(
-  "/",
-  (req, res) => {
+router.get("/", async (req, res, next) => {
+  try {
     const { hostId, location, pricePerNight } = req.query;
-    const properties = viewProperties(hostId, location, pricePerNight);
+    const properties = await viewProperties(hostId, location, pricePerNight);
     res.status(200).json(properties);
-  },
-  notFoundErrorHandler
-);
+  } catch (error) {
+    next(error);
+  }
+});
 
 router.get("/:id", async (req, res, next) => {
   const { id } = req.params;

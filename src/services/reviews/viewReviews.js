@@ -1,7 +1,13 @@
-import reviewData from '../../data/reviews.json' assert { type: 'json' }
+import { PrismaClient } from "@prisma/client";
 
-const viewReviews = () => {
-    return reviewData["reviews"];
+const viewReviews = async () => {
+  try {
+    const prisma = new PrismaClient();
+    const reviews = prisma.review.findMany();
+    return reviews;
+  } catch (error) {
+    return null;
+  }
 };
 
 export default viewReviews;

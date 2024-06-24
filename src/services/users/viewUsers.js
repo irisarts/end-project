@@ -1,8 +1,12 @@
-import userData from '../../data/users.json' assert { type: 'json' }
+import { PrismaClient } from "@prisma/client";
 
-const viewUsers = () => {
-    return userData["users"];
+const viewUsers = async () => {
+  try {
+    const prisma = new PrismaClient();
+    const users = await prisma.user.findMany();
+    return users;
+  } catch (error) {
+    return null;
+  }
 };
-
 export default viewUsers;
-
